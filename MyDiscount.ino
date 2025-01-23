@@ -1,34 +1,34 @@
-#define SERVO_PIN1 PB0 // Вибір піну для сигналу
-#define SERVO_PIN2 PB1 // Вибір піну для сигналу
-#define BUTTON1_PIN PB4 // Кнопка 1
-#define BUTTON2_PIN PB3 // Кнопка 2
-#define LED_PIN PB1 // Сввітлодіод
+#define SERVO_PIN1 PB0 
+#define SERVO_PIN2 PB1
+#define BUTTON1_PIN PB4 
+#define BUTTON2_PIN PB3
+#define LED_PIN PB1 
 #define ANALOG  
 
-#define BUTTON1_PIN PB4 // PB3 (Button 2)
-#define BUTTON2_PIN PB3 // PB3 (Button 2)
+#define BUTTON1_PIN PB4 
+#define BUTTON2_PIN PB3 
 
 #include <util/delay.h>
 #include <avr/io.h>
 
-// Задай мінімальну і максимальну ширину імпульсу для твого серво
-#define PULSE_MIN 500 // мінімум для твого серво (~0°)
-#define PULSE_MAX 2300 // максимум для твого серво (~180°)
+
+#define PULSE_MIN 500 
+#define PULSE_MAX 2300 
 
 void setServoAngle(int16_t angle,int16_t numServo) {
-    // Розрахунок ширини імпульсу для заданого кута
+    
     uint16_t pulseWidth = PULSE_MIN + ((int32_t)(angle + 90) * (PULSE_MAX - PULSE_MIN) / 180);
-    for (uint8_t i = 0; i < 50; i++) { // 50 імпульсів для 1 секунди
-        PORTB |= (1 << numServo); // HIGH
-        delayMicroseconds(pulseWidth); // Тривалість HIGH
-        PORTB &= ~(1 << numServo); // LOW
-        delayMicroseconds(20000 - pulseWidth); // Тривалість LOW
+    for (uint8_t i = 0; i < 50; i++) { 
+        PORTB |= (1 << numServo); 
+        delayMicroseconds(pulseWidth); 
+        PORTB &= ~(1 << numServo); 
+        delayMicroseconds(20000 - pulseWidth); 
     }
 }
 
 void ADC_init() {
-    ADMUX = (1 << MUX0); // Вибір ADC1 (PB2)
-    ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1); // Включення ADC, переддільник 64
+    ADMUX = (1 << MUX0); 
+    ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1); 
 }
 
 uint16_t ADC_read() {
@@ -38,15 +38,15 @@ uint16_t ADC_read() {
 }
 
 void setup() {
-    DDRB |= (1 << SERVO_PIN1); // Налаштування SERVO_PIN як виходу
-    DDRB |= (1 << SERVO_PIN2); // Налаштування SERVO_PIN як виходу
-    DDRB |= (1 << LED_PIN); // Налаштування піну 3 (PB3) на вихід
+    DDRB |= (1 << SERVO_PIN1); 
+    DDRB |= (1 << SERVO_PIN2); 
+    DDRB |= (1 << LED_PIN); 
     ADC_init();
-    DDRB &= ~(1 << BUTTON1_PIN); // PB4 як вхід
-    DDRB &= ~(1 << BUTTON2_PIN); // PB3 як вхід
+    DDRB &= ~(1 << BUTTON1_PIN); 
+    DDRB &= ~(1 << BUTTON2_PIN); 
 
-    // Увімкнення внутрішніх підтягувальних резисторів
-    PORTB |= (1 << BUTTON1_PIN); // Підтягувальний резистор для PB4
+   
+    PORTB |= (1 << BUTTON1_PIN); 
     PORTB |= (1 << BUTTON2_PIN);
 }
 bool st1 = 0;
@@ -54,35 +54,35 @@ bool st2 = 0;
 void loop() {
 
       // Ініціалізація ADC
-    //uint8_t button1State = PINB & (1 << BUTTON1_PIN); // Стан PB4
-    //uint8_t button2State = PINB & (1 << BUTTON2_PIN); // Стан PB3
+    //uint8_t button1State = PINB & (1 << BUTTON1_PIN); 
+    //uint8_t button2State = PINB & (1 << BUTTON2_PIN); 
      
   
-   if (PINB & (1 << BUTTON2_PIN)) { // Якщо PB3 HIGH
-      setServoAngle(-90, SERVO_PIN1);  // -90 градусів для першого серво
+   if (PINB & (1 << BUTTON2_PIN)) { 
+      setServoAngle(-90, SERVO_PIN1);  
        _delay_ms(500);
-       setServoAngle(-90, SERVO_PIN2);  // -90 градусів для першого серво
+       setServoAngle(-90, SERVO_PIN2);  
        _delay_ms(500);  
     } else if (PINB & (1 << BUTTON1_PIN)){ // Якщо PB3 LOW
-        setServoAngle(90, SERVO_PIN1);  // -90 градусів для першого серво
+        setServoAngle(90, SERVO_PIN1);  
         _delay_ms(500);
-        setServoAngle(90, SERVO_PIN2);  // -90 градусів для першого серво
+        setServoAngle(90, SERVO_PIN2);  
         _delay_ms(500);
         
         while(1) {
           
           if (ADC_read() > 600 and st1 == 0 and st2 == 0) {
-            setServoAngle(-90, SERVO_PIN1);  // -90 градусів для першого серво
+            setServoAngle(-90, SERVO_PIN1);  
             st1 = 1;
             _delay_ms(1500);
           }
           if (ADC_read() > 600 and st1 == 1 and st2 == 0) {
-            setServoAngle(-90, SERVO_PIN2);  // -90 градусів для першого серво
+            setServoAngle(-90, SERVO_PIN2);  
             break;
           }
          }
     }
-    _delay_ms(100); // Антидребезг
+    _delay_ms(100); 
 /*
     if (analogValue < 600) {
         PORTB |= (1 << LED_PIN );
@@ -91,45 +91,40 @@ void loop() {
     }
 */    
 }
- /*  setServoAngle(-90, SERVO_PIN1);  // -90 градусів для першого серво
-    _delay_ms(1000);     // Затримка 1 секунда
+ /*  setServoAngle(-90, SERVO_PIN1); 
+    _delay_ms(1000);    
+    setServoAngle(0, SERVO_PIN1);    
+    setServoAngle(90, SERVO_PIN1);   
+    _delay_ms(1000);    
+    setServoAngle(-90, SERVO_PIN2);  
+    _delay_ms(1000);    
 
-    setServoAngle(0, SERVO_PIN1);    // 0 градусів для першого серво
-    _delay_ms(1000);     // Затримка 1 секунда
+    setServoAngle(0, SERVO_PIN2);    
+    _delay_ms(1000);     
 
-    setServoAngle(90, SERVO_PIN1);   // 90 градусів для першого серво
-    _delay_ms(1000);     // Затримка 1 секунда
-
-    setServoAngle(-90, SERVO_PIN2);  // -90 градусів для другого серво
-    _delay_ms(1000);     // Затримка 1 секунда
-
-    setServoAngle(0, SERVO_PIN2);    // 0 градусів для другого серво
-    _delay_ms(1000);     // Затримка 1 секунда
-
-    setServoAngle(90, SERVO_PIN2);   // 90 градусів для другого серво
-    _delay_ms(1000);     // Затримка 1 секунда
-
+    setServoAngle(90, SERVO_PIN2);  
+    _delay_ms(1000);    
 }
 */
 /*
-#define BUTTON1_PIN PB4 // PB3 (Button 2)
-#define BUTTON2_PIN PB3 // PB3 (Button 2)
-#define LED_PIN PB0     // Світлодіод на PB5
+#define BUTTON1_PIN PB4 
+#define BUTTON2_PIN PB3 
+#define LED_PIN PB0    
 
 void setup() {
-    DDRB &= ~(1 << BUTTON2_PIN); // PB3 як вхід
+    DDRB &= ~(1 << BUTTON2_PIN); 
     DDRB &= ~(1 << BUTTON1_PIN); 
-    PORTB |= (1 << BUTTON2_PIN); // Увімкнення підтягувального резистора
+    PORTB |= (1 << BUTTON2_PIN);
     PORTB |= (1 << BUTTON1_PIN);
-    DDRB |= (1 << LED_PIN);      // PB5 як вихід
+    DDRB |= (1 << LED_PIN);     
 }
 
 void loop() {
-    if (PINB & (1 << BUTTON2_PIN)) { // Якщо PB3 HIGH
-        PORTB |= (1 << LED_PIN); // Увімкнути світлодіод
-    } else if (PINB & (1 << BUTTON1_PIN)){ // Якщо PB3 LOW
-        PORTB &= ~(1 << LED_PIN); // Вимкнути світлодіод
+    if (PINB & (1 << BUTTON2_PIN)) { 
+        PORTB |= (1 << LED_PIN); 
+    } else if (PINB & (1 << BUTTON1_PIN)){ 
+        PORTB &= ~(1 << LED_PIN); 
     }
-    _delay_ms(100); // Антидребезг
+    _delay_ms(100);
 }
 */
